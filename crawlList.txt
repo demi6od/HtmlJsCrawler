@@ -1,0 +1,7 @@
+#url, recursize deep, html files count, js files count
+http://www.baidu.com, 2, 100, 100
+http://www.taobao.com, 2, 100, 100
+http://www.qq.com, 2, 100, 100
+http://www.sina.com.cn, 2, 100, 100
+http://www.weibo.com, 2, 100, 100
+http://www.ifeng.com, 2, 100, 100
