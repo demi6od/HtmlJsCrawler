@@ -37,6 +37,9 @@ def writeFile(url, fileType):
 
         page = urllib2.urlopen(url, timeout = TIME_OUT)
         src = page.read()
+        if not src:
+            return
+
         if fileType == "html":
             output = open(HTML_FILE_DIR + str(gHtmlIdx) +".html", "w")
             gHtmlIdx += 1
@@ -50,9 +53,9 @@ def writeFile(url, fileType):
         output.write(src)
         output.close()
 
-    except Exception,data:
+    except Exception, data:
         print "[-] Write file exception"
-        print Exception,":",data
+        print Exception, ":", data
 
 
 def crawl(url, deep):
@@ -62,13 +65,15 @@ def crawl(url, deep):
         soup = BeautifulSoup(src)
 
         if gJsCnt < gJsCntMax:
-            scripts = soup.findAll("script", src=re.compile(".js"))
+            scripts = soup.findAll("script", src=re.compile("\\.js"))
             for tag in scripts:
-                jsHref = tag.get("src", )
-                if jsHref:
+                jsHref = tag.get("src")
+                if jsHref and jsHref[len(jsHref)-3:] == ".js" :
+                    jsHref = jsHref.split("?")[0]
                     if not re.match(r'http://', jsHref):
                         jsHref = url + jsHref 
                     if not jsHref in gJsList:
+                        print "[+] Js: " + jsHref.encode('utf-8')
                         gJsList.append(jsHref)
                         writeFile(jsHref, "js")
 
@@ -76,21 +81,22 @@ def crawl(url, deep):
         for tag in anchors:
             href = tag.get("href")
             if href:
-                href = href.split("?")[0].split("#")[0].split("javascript:")[0]
+                href = href.split("?")[0].split("#")[0].split("javascript:")[0].split(" ")[0]
                 if len(href) > 0 and href[len(href)-1] == '/':
                     href = href[:-1]
                 if not re.match(r'http://', href):
                     href = url + href
                 if not href in gHtmlList:
-                    print "[+] " + href.encode('utf-8')
+                    print "[+] Html: " + href.encode('utf-8')
                     gHtmlList.append(href)
                     if gHtmlCnt < gHtmlCntMax:
                         writeFile(href, "html")
                     if deep > 0 and (gHtmlCnt < gHtmlCntMax or gJsCnt < gJsCntMax) :
                         crawl(href, deep-1)
-    except Exception,data:
+
+    except Exception, data:
         print "[-] Crawl exception"
-        print Exception,":",data
+        print Exception, ":", data
 
 
 def main():
